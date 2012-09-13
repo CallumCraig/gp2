@@ -67,6 +67,10 @@ void CGameApplication::update()
 //Update game state, AI, input devices and physics
 bool CGameApplication::initGraphics()
 {
+	RECT windowRect;
+	GetClientRect(m_pWindow->getHandleToWindow(),&windowRect);
+
+	UINT width=windowRect.right-windowRect.left;
 	return true;
 }
 
