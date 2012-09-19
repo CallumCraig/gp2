@@ -86,7 +86,9 @@
     <ClInclude Include="Win32Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ScreenSpace.fx" />
+    <None Include="ScreenSpace.fx">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

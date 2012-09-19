@@ -6,7 +6,7 @@ struct Vertex
 	D3DXVECTOR3 pos;
 };
 
-//Creates a Class
+//Creates a Class - Constructor
 CGameApplication::CGameApplication(void)
 {
 	m_pWindow=NULL;
@@ -16,7 +16,7 @@ CGameApplication::CGameApplication(void)
 	m_pVertexBuffer=NULL;
 }
 
-//Destroys a class
+//Destroys a class - Deconstructor
 CGameApplication::~CGameApplication(void)
 {
 	if(m_pD3D10Device)
@@ -24,6 +24,12 @@ CGameApplication::~CGameApplication(void)
 
 	if(m_pVertexBuffer) //reclaim all memory allocated to buffer object
 		m_pVertexBuffer->Release();
+
+	if(m_pVertexLayout) //release the input layout
+		m_pVertexLayout->Release();
+
+	if(m_pEffect) //dealocate memory for created effects
+		m_pEffect->Release();
 
 	if(m_pRenderTargetView)
 		m_pRenderTargetView->Release();
@@ -56,12 +62,58 @@ bool CGameApplication::init()
 //creates objects used to run the game, textures, effects and 3d models
 bool CGameApplication::initGame()
 {
+	DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS; //puts effect loading in debug mode which gives us more information
+#if defined(DEBUG) || defined(_DEBUG)
+	dwShaderFlags |= D3D10_SHADER_DEBUG;
+#endif
+
+	if(FAILED(D3DX10CreateEffectFromFile(TEXT("ScreenSpace.fx"),
+		NULL,NULL,"fx_4_0",dwShaderFlags,0,
+		m_pD3D10Device,NULL,NULL,&m_pEffect,
+		NULL,NULL)))
+	{
+		MessageBox(NULL,TEXT("The FX file cannot be located. Please run this executable from the directory that contains the FX file."),
+			TEXT("Error"),
+			MB_OK);
+		return false;
+	}
+
+	m_pTechnique = m_pEffect->GetTechniqueByName("Render"); //pass in string which is the name of the effect we want to call
+
 	D3D10_BUFFER_DESC bd; //used to specify options for when we create a buffer
 	bd.Usage = D3D10_USAGE_DEFAULT; //describes how the buffer is read/written to
 	bd.ByteWidth = sizeof(Vertex)*3; //the size of the buffer
 	bd.BindFlags = D3D10_BIND_VERTEX_BUFFER; //type of buffer we are creating
 	bd.CPUAccessFlags = 0; //to specify if the buffer can read/written to by CPU
 	bd.MiscFlags = 0; // for additional options
+
+	D3D10_INPUT_ELEMENT_DESC layout[] = //Layout descriptions for different elements of vertex
+	{
+		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,
+		D3D10_INPUT_PER_VERTEX_DATA,0},
+	};
+
+	UINT numElements = sizeof(layout)/sizeof(D3D10_INPUT_ELEMENT_DESC); //calculates the number of elements in the input array
+	D3D10_PASS_DESC PassDesc;
+	m_pTechnique->GetPassByIndex(0)->GetDesc(&PassDesc); // recives the pass description from the technique
+
+	//creates input layout
+	if(FAILED(m_pD3D10Device->CreateInputLayout(layout,
+		numElements,
+		PassDesc.pIAInputSignature,
+		PassDesc.IAInputSignatureSize,
+		&m_pVertexLayout)))
+	{
+		return false;
+	}
+
+	m_pD3D10Device->IASetInputLayout(m_pVertexLayout); //tells input assembler about input layout
+
+	UINT stride = sizeof(Vertex); // assigns a value to hold the size of one vertex
+	UINT offset = 0; //assigns a value to hold the offset which is where the vertices start in the vertex buffer
+	m_pD3D10Device->IASetVertexBuffers(0,1,&m_pVertexBuffer,&stride,&offset); //binds one or many buffers to the input assembler
+
+	m_pD3D10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST); //tells Input Assembler what kind of primitive to draw
 
 	Vertex vertices[] =
 	{
@@ -99,10 +151,15 @@ void CGameApplication::render()
 	float ClearColor[4] = {0.0f,0.125f,0.3f,1.0f}; //sets up float array for RGBA
 	m_pD3D10Device->ClearRenderTargetView(m_pRenderTargetView,ClearColor); //will clear the render target to the above colour 
 
-	//ALL DRAW CODE SHOULD GO HERE
-	
+	D3D10_TECHNIQUE_DESC techDesc;
+	m_pTechnique->GetDesc(&techDesc);
+	for(UINT p=0; p<techDesc.Passes;++p)
+	{
+		m_pTechnique->GetPassByIndex(p)->Apply(0);
+		m_pD3D10Device->Draw(3,0);
+	}
 
-	m_pSwapChain->Present(0,0);//flips swap chain so back buffer is copied to front buffer
+	m_pSwapChain->Present(0,0); //flips swap chain so back buffer is copied to front buffer
 }
 
 //Draw Code
