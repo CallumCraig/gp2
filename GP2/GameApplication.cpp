@@ -1,5 +1,11 @@
 #include "GameApplication.h"
 
+//structure to hold a vertex
+struct Vertex
+{
+	D3DXVECTOR3 pos;
+};
+
 //Creates a Class
 CGameApplication::CGameApplication(void)
 {
@@ -7,6 +13,7 @@ CGameApplication::CGameApplication(void)
 	m_pD3D10Device=NULL;
 	m_pRenderTargetView=NULL;
 	m_pSwapChain=NULL;
+	m_pVertexBuffer=NULL;
 }
 
 //Destroys a class
@@ -14,6 +21,9 @@ CGameApplication::~CGameApplication(void)
 {
 	if(m_pD3D10Device)
 		m_pD3D10Device->ClearState();
+
+	if(m_pVertexBuffer) //reclaim all memory allocated to buffer object
+		m_pVertexBuffer->Release();
 
 	if(m_pRenderTargetView)
 		m_pRenderTargetView->Release();
@@ -37,7 +47,36 @@ bool CGameApplication::init()
 	if(!initGraphics())
 		return false;
 
+	if(!initGame())
+		return false;
+
 	return true;
+}
+
+//creates objects used to run the game, textures, effects and 3d models
+bool CGameApplication::initGame()
+{
+	D3D10_BUFFER_DESC bd; //used to specify options for when we create a buffer
+	bd.Usage = D3D10_USAGE_DEFAULT; //describes how the buffer is read/written to
+	bd.ByteWidth = sizeof(Vertex)*3; //the size of the buffer
+	bd.BindFlags = D3D10_BIND_VERTEX_BUFFER; //type of buffer we are creating
+	bd.CPUAccessFlags = 0; //to specify if the buffer can read/written to by CPU
+	bd.MiscFlags = 0; // for additional options
+
+	Vertex vertices[] =
+	{
+		D3DXVECTOR3(0.0f,0.5f,0.5f),
+		D3DXVECTOR3(0.5f,-0.5f,0.5f),
+		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
+	};
+
+	D3D10_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = vertices;
+
+	if(FAILED(m_pD3D10Device->CreateBuffer(&bd,&InitData,&m_pVertexBuffer)))
+		return false;
+
+	return true; 
 }
 
 //Intialization code for the game
@@ -61,7 +100,7 @@ void CGameApplication::render()
 	m_pD3D10Device->ClearRenderTargetView(m_pRenderTargetView,ClearColor); //will clear the render target to the above colour 
 
 	//ALL DRAW CODE SHOULD GO HERE
-
+	
 
 	m_pSwapChain->Present(0,0);//flips swap chain so back buffer is copied to front buffer
 }
