@@ -67,13 +67,15 @@ bool CGameApplication::initGame()
 	dwShaderFlags |= D3D10_SHADER_DEBUG;
 #endif
 
+	ID3D10Blob *pErrors = NULL;
+
 	if(FAILED(D3DX10CreateEffectFromFile(TEXT("ScreenSpace.fx"),
 		NULL,NULL,"fx_4_0",dwShaderFlags,0,
 		m_pD3D10Device,NULL,NULL,&m_pEffect,
-		NULL,NULL)))
+		&pErrors,NULL)))
 	{
-		MessageBox(NULL,TEXT("The FX file cannot be located. Please run this executable from the directory that contains the FX file."),
-			TEXT("Error"),
+		MessageBoxA(NULL,(char*)pErrors->GetBufferPointer(),
+			"Error",
 			MB_OK);
 		return false;
 	}
@@ -111,7 +113,7 @@ bool CGameApplication::initGame()
 
 	UINT stride = sizeof(Vertex); // assigns a value to hold the size of one vertex
 	UINT offset = 0; //assigns a value to hold the offset which is where the vertices start in the vertex buffer
-	m_pD3D10Device->IASetVertexBuffers(0,1,&m_pVertexBuffer,&stride,&offset); //binds one or many buffers to the input assembler
+	
 
 	m_pD3D10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST); //tells Input Assembler what kind of primitive to draw
 
@@ -127,6 +129,8 @@ bool CGameApplication::initGame()
 
 	if(FAILED(m_pD3D10Device->CreateBuffer(&bd,&InitData,&m_pVertexBuffer)))
 		return false;
+
+	m_pD3D10Device->IASetVertexBuffers(0,1,&m_pVertexBuffer,&stride,&offset); //binds one or many buffers to the input assembler
 
 	return true; 
 }
