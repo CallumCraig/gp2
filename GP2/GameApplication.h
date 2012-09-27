@@ -32,19 +32,18 @@ private:
 
 	CWin32Window * m_pWindow;
 
-	ID3D10Buffer*	m_pVertexBuffer;
+	ID3D10Buffer *	m_pVertexBuffer;
 	ID3D10InputLayout*	m_pVertexLayout; //used to hold the input layout used to describe the vertex to the pipeline
 
-	ID3D10Effect*	m_pEffect; //holds our loaded effect file
+	ID3D10Buffer * m_pIndexBuffer; 
+
+	ID3D10Effect *	m_pEffect; //holds our loaded effect file
 	ID3D10EffectTechnique*	m_pTechnique; //variable used in rendering process
 
 	ID3D10EffectMatrixVariable * m_pWorldMatrixVariable; //sends world matrix across effect
 
 	ID3D10EffectMatrixVariable * m_pViewMatrixVariable;
 	ID3D10EffectMatrixVariable * m_pProjectionMatrixVariable;
-
-	ID3D10EffectShaderResourceVariable * m_pDiffuseTextureVariable;
-	ID3D10ShaderResourceView * m_pTextureShaderResource;
 
 	D3DXMATRIX m_matView;
 	D3DXMATRIX m_matProjection;
