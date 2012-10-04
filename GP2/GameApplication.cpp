@@ -24,6 +24,7 @@ CGameApplication::CGameApplication(void)
 	m_pWorldMatrixVariable=NULL;
 	m_pViewMatrixVariable=NULL;
 	m_pProjectionMatrixVariable=NULL;
+	m_pDiffuseTexture=NULL;
 }
 
 //Destroys a class - Deconstructor
@@ -58,6 +59,9 @@ CGameApplication::~CGameApplication(void)
 
 	if(m_pD3D10Device)
 		m_pD3D10Device->Release();
+
+	if(m_pDiffuseTexture)
+		m_pDiffuseTexture->Release();
 
 	if(m_pWindow)
 	{
@@ -198,6 +202,14 @@ bool CGameApplication::initGame()
 	m_vecRotation = D3DXVECTOR3(0.0f,0.0f,0.0f); //sets rotation of vectors
 	m_pWorldMatrixVariable = m_pEffect->GetVariableByName("matWorld")->AsMatrix(); //retrieves world matrix from effect andsends world matrix to effect
 
+	if(FAILED(D3DX10CreateShaderResourceViewFromFile(m_pD3D10Device,TEXT("rockwall.jpg"),NULL,NULL,&m_pDiffuseTexture,NULL)))
+	{
+		MessageBox(NULL,TEXT("Can't load Texture"),TEXT("Error"),MB_OK);
+		return false;
+	}
+
+	m_pDiffuseTextureVariable=m_pEffect->GetVariableByName("diffuseTexture")->AsShaderResource();
+
 	return true; 
 }
 
@@ -224,6 +236,8 @@ void CGameApplication::render()
 	m_pD3D10Device->ClearDepthStencilView(m_pDepthStencilView,D3D10_CLEAR_DEPTH,1.0f,0);
 
 	m_pViewMatrixVariable->SetMatrix((float*)m_matView); //sent the view matrix to the effect
+
+	m_pDiffuseTextureVariable->SetResource(m_pDiffuseTexture);
 
 	m_pWorldMatrixVariable->SetMatrix((float*)m_matWorld);
 

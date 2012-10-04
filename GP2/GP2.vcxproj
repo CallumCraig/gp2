@@ -89,6 +89,7 @@
     <None Include="ScreenSpace.fx">
       <FileType>Document</FileType>
     </None>
+    <None Include="Texture.fx" />
     <None Include="Transform.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
