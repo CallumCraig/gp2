@@ -4,6 +4,8 @@
 struct Vertex
 {
 	D3DXVECTOR3 pos;
+	D3DXCOLOR colour;
+	D3DXVECTOR2 texCoords;
 };
 
 //Creates a Class - Constructor
@@ -88,7 +90,7 @@ bool CGameApplication::initGame()
 
 	ID3D10Blob *pErrors = NULL;
 
-	if(FAILED(D3DX10CreateEffectFromFile(TEXT("Transform.fx"),
+	if(FAILED(D3DX10CreateEffectFromFile(TEXT("Texture.fx"),
 		NULL,NULL,"fx_4_0",dwShaderFlags,0,
 		m_pD3D10Device,NULL,NULL,&m_pEffect,
 		&pErrors,NULL)))
@@ -104,17 +106,17 @@ bool CGameApplication::initGame()
 	//Create Vertex Buffer
 	D3D10_BUFFER_DESC bd; //used to specify options for when we create a buffer
 	bd.Usage = D3D10_USAGE_DEFAULT; //describes how the buffer is read/written to
-	bd.ByteWidth = sizeof(Vertex)*3; //the size of the buffer
+	bd.ByteWidth = sizeof(Vertex)*4; //the size of the buffer
 	bd.BindFlags = D3D10_BIND_VERTEX_BUFFER; //type of buffer we are creating
 	bd.CPUAccessFlags = 0; //to specify if the buffer can read/written to by CPU
 	bd.MiscFlags = 0; // for additional options
 
 	Vertex vertices[] =
 	{
-		D3DXVECTOR3(0.0f,0.5f,0.0f),
-		D3DXVECTOR3(0.5f,0.0f,0.0f),
-		D3DXVECTOR3(0.5f,0.5f,0.0f),
-		D3DXVECTOR3(0.0f,0.0f,0.0f),
+		{D3DXVECTOR3(0.0f,0.5f,0.0f),D3DXCOLOR(0.0f,1.0f,1.0f,1.0f),D3DXVECTOR2(0.0f,0.0f)},
+		{D3DXVECTOR3(0.5f,0.0f,0.0f),D3DXCOLOR(1.0f,0.0f,1.0f,1.0f),D3DXVECTOR2(1.0f,1.0f)},
+	    {D3DXVECTOR3(0.5f,0.5f,0.0f),D3DXCOLOR(1.0f,1.0f,0.0f,1.0f),D3DXVECTOR2(0.0f,1.0f)},
+        {D3DXVECTOR3(0.0f,0.0f,0.0f),D3DXCOLOR(1.0f,0.5f,1.0f,1.0f),D3DXVECTOR2(1.0f,0.0f)},
 	};
 
 	D3D10_SUBRESOURCE_DATA InitData;
@@ -144,6 +146,8 @@ bool CGameApplication::initGame()
 	D3D10_INPUT_ELEMENT_DESC layout[] = //Layout descriptions for different elements of vertex
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D10_INPUT_PER_VERTEX_DATA,0},
+		{"COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,12,D3D10_INPUT_PER_VERTEX_DATA,0},
+		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,28,D3D10_INPUT_PER_VERTEX_DATA,0},
 	};
 
 	UINT numElements = sizeof(layout)/sizeof(D3D10_INPUT_ELEMENT_DESC); //calculates the number of elements in the input array
@@ -171,7 +175,7 @@ bool CGameApplication::initGame()
 	m_pD3D10Device->IASetVertexBuffers(0,1,&m_pVertexBuffer,&stride,&offset); //binds one or many buffers to the input assembler
 
 	//Calculates the camera position and where it is looking
-	D3DXVECTOR3 cameraPos(0.0f,0.0f,-10.0f);
+	D3DXVECTOR3 cameraPos(0.0f,0.0f,-5.0f);
 	D3DXVECTOR3 cameraLook(0.0f,0.0f,1.0f);
 	D3DXVECTOR3 cameraUp(0.0f,1.0f,0.0f);
 	D3DXMatrixLookAtLH(&m_matView,&cameraPos,
