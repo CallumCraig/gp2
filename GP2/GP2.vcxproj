@@ -86,9 +86,12 @@
     <ClInclude Include="Win32Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ambient.fx" />
+    <None Include="diffuse.fx" />
     <None Include="ScreenSpace.fx">
       <FileType>Document</FileType>
     </None>
+    <None Include="specular.fx" />
     <None Include="Texture.fx" />
     <None Include="Transform.fx" />
   </ItemGroup>
