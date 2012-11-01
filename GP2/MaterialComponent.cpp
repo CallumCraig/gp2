@@ -154,6 +154,8 @@ void CMaterialComponent::init()
 	m_pSpecularMaterialVariable=m_pEffect->GetVariableByName("specularMaterialColour")->AsVector();
 	m_pSpecularPowerVariable=m_pEffect->GetVariableByName("specularPower")->AsScalar();
 
+	m_pUseDiffuseTextureVariable=m_pEffect->GetVariableByName("useDiffuseTexture")->AsScalar();
+
 	//Camera
 	m_pCameraPositionVariable=m_pEffect->GetVariableByName("cameraPosition")->AsVector();
 }
